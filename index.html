@@ -28,7 +28,7 @@
                 font-size: 3em;
             }
 
-            #options {
+            #options, #averageToWatch {
                 color: #4f565f;
             }
 
@@ -105,6 +105,12 @@
                 display: block;
             }
 
+            #countDown {
+                background-color: #5a85c5;
+                border-radius: 0.25em;
+                /* background-color: #3b14d9; */
+            }
+
         </style>
     </head>
     <body>
@@ -174,24 +180,60 @@
                 return text;
             }
 
+            function getZeroEpisodesText() {
+                textArray = [
+                    "you're done for today, go outside!",
+                    "phew! you're on track",
+                    "you deserve a break after that marathon",
+                    "you're all caught up here, let's watch something else!",
+                    "you don't really need to watch another...",
+                    "time to rest those eyes",
+                    "you have met your daily quota, now frolick",
+                    "ok, enough television, go bake a cake or something" 
+                ];
+
+                randomNumber = Math.floor(Math.random() * Math.floor(textArray.length));
+
+                return textArray[randomNumber];
+            }
+
             function calculateEpisodesToday(show) {
                 const episodesLeft = calculateEpisodesLeft(show);
                 const daysLeft = calculateDaysLeft();
                 let episodesToday = null;
                 let text = "";
 
-                if (episodesLeft / daysLeft < 1) {
-                    episodesToday = parseInt(Math.floor(episodesLeft / daysLeft));
-                }
-                else {
-                    episodesToday = parseInt(Math.ceil(episodesLeft / daysLeft));
-                }
+                episodesToday = episodesLeft - daysLeft;
 
-                if (episodesToday == 1) {
+                if (episodesToday < 1) {
+                    text = getZeroEpisodesText();
+                }
+                else if (episodesToday == 1) {
                     text = "watch " + episodesToday + " episode today";
                 }
                 else {
                     text = "watch " + episodesToday + " episodes today";
+                };
+
+                return text;
+            }
+
+            function calculateAveragePerDay(show) {
+                const episodesLeft = calculateEpisodesLeft(show);
+                const daysLeft = calculateDaysLeft();
+                let text = "";
+
+                averageEpisodes = (episodesLeft/daysLeft).toFixed(2);
+
+                if (daysLeft < 1) {
+                    averageEpisodes = (episodesLeft/1).toFixed(2);
+                }
+
+                if (averageEpisodes == 1) {
+                    text = "(or an average of " + averageEpisodes + " episode each day)";
+                }
+                else {
+                    text = "(or an average of " + averageEpisodes + " episodes each day)";
                 };
 
                 return text;
@@ -214,12 +256,13 @@
                 const nextEpisode = getNextEpisode(show);
 
                 if (!nextEpisode) {
-                    document.querySelector("#nextEpisode").innerHTML = `<p>You're up to date!</p>`;
+                    document.querySelector("#nextEpisode").innerHTML = `<p>You've watched it all!</p>`;
                     document.querySelector("#watchedBtn").style.display = "none";
                     document.querySelector("#options").style.display = "none";
                     document.querySelector("#episodesToday").style.display = "none";
-                    document.querySelector("#leftToWatch").style.display = "none";
-                    document.querySelector("#daysLeft").style.display = "none";
+                    document.querySelector("#averageToWatch").style.display = "none";                    
+                    // document.querySelector("#leftToWatch").style.display = "none";
+                    // document.querySelector("#daysLeft").style.display = "none";
                     document.querySelector("#options").style.display = "block";
                     document.querySelector("#watchedMore").style.display = "none";
                 }
@@ -229,12 +272,14 @@
                     document.querySelector("#nextEpisode").innerHTML = `<p>Next episode: ${makeEpisodeText(number, season, name)}</p>`;
                 };
 
-                document.querySelector("#episodesToday").innerHTML = `<p>${calculateEpisodesToday(show)}</p>`;
-                document.querySelector("#leftToWatch").innerHTML = `<p>${calculateEpisodesLeft(show)} episodes to watch before <span id="deadline"></span></p>`;
-                document.querySelector("#daysLeft").innerHTML = `<p>${getDaysLeftText()}</p>`;
                 document.querySelector("#showTitle").innerHTML = `<p>${show.name}</p>`;
+                document.querySelector("#countDown").innerHTML = `<span>test</span>`;
+                document.querySelector("#episodesToday").innerHTML = `<p>${calculateEpisodesToday(show)}</p>`;
+                document.querySelector("#averageToWatch").innerHTML = `<p>${calculateAveragePerDay(show)}</p>`;
+                // document.querySelector("#leftToWatch").innerHTML = `<p>${calculateEpisodesLeft(show)} episodes to watch before <span id="deadline"></span></p>`;
+                // document.querySelector("#daysLeft").innerHTML = `<p>${getDaysLeftText()}</p>`;
             
-                updateDate();
+                // updateDate();
             }
 
             function updateDate() {
@@ -339,11 +384,13 @@
             function createOutputUI() {
                 document.querySelector("#meeper-container").innerHTML = 
                     `<div id="showTitle"></div>
+                    <div id="countDown"></div>
                     <div id="nextEpisode"></div>
                     <button id="watchedBtn">watched it.</button>
                     <p id="options"><span id="reset">reset?</span> <span id="watchedMore">| watched more?</span></p>
                     <div id="episodesToday"></div>
                     <div id="leftToWatch"></div>
+                    <div id="averageToWatch"></div>
                     <div id="deadline"></div>
                     <div id="daysLeft"></div>`
                 ;
