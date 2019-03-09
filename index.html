@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>watched it.</title>
+        <link rel="icon" type="image/png" href="https://cdn4.iconfinder.com/data/icons/retro-tv/100/vintage_tv8_fixed-512.png">
+        <link rel="stylesheet" href="https://unpkg.com/js-datepicker/dist/datepicker.min.css">
+
+        <style>
+
+            body {
+                text-align: center;
+                font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+                color: #2a2e33;
+            }
+
+            #meeper-container {
+                padding: 20px;
+                max-width: 100%;
+            }
+
+            #nextEpisode, #episodesToday, #leftToWatch, #daysLeft {
+                font-size: 2em;
+            }
+
+             #showTitle {
+                font-size: 3em;
+            }
+
+            #options {
+                color: #4f565f;
+            }
+
+            #reset:hover, #watchedMore:hover {
+                cursor: pointer;
+                color: #2a2e33;
+            }
+
+            button {
+                background-color: #ec528d;
+                border: 0;
+                border-radius: 4px;
+                padding: 20px 40px;
+                margin: 20px;
+                cursor: pointer;
+                font-size: 4em;
+                color: #f2f8ff;
+                -webkit-transition-duration: 0.4s; /* Safari */
+                transition-duration: 0.4s;
+            }
+
+            button:hover {
+                box-shadow: 0 12px 16px 0 rgba(0,0,0,0.24),0 17px 50px 0 rgba(0,0,0,0.19);
+            }
+
+            input {
+                color: #bbbbbb;
+                font-size: 2em;
+                font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+                border: none;
+                border-bottom: 2px solid #ec528d;
+                margin: 20px;
+                padding: 20px;
+                box-sizing: border-box;
+                -webkit-transition-duration: 0.4s;
+                transition-duration: 0.4s;
+            }
+
+            input::placeholder {
+                color: #bbbbbb;
+            }
+
+            @media only screen and (max-width: 600px){
+                #meeper-container {
+                    width: 90%;
+                }
+
+                input {
+                    display: block;
+                    margin: auto;
+                    margin-top: 10px;
+                    width: 100%;
+                }
+
+                button {
+                    font-size: 2em;
+                }
+            }
+
+            input:hover {
+                box-shadow: 0 12px 16px 0 rgba(0,0,0,0.24),0 17px 50px 0 rgba(0,0,0,0.19);
+            }
+
+            input:focus {
+                box-shadow: 0 12px 16px 0 rgba(0,0,0,0.24),0 17px 50px 0 rgba(0,0,0,0.19);
+            }
+
+            label {
+                font-size: 2em;
+            }
+
+            .inputContainer {
+                margin: 40px 20px;
+                display: block;
+            }
+
+        </style>
+    </head>
+    <body>
+        <div id="meeper-container"></div>
+
+        <script src="https://cdn.jsdelivr.net/npm/typed.js@2.0.9"></script>
+        <script src="https://unpkg.com/js-datepicker"></script> 
+        <script>
+
+            function makeEpisodeText(num, season, title) {
+                let text = "";
+
+                if (season > 9) {
+                    text = "S" + season;
+                }
+                else {
+                    text = "S0" + season;
+                };
+
+                if (num > 9) {
+                    text = text + "E" + num + " - " + title;
+                }
+                else {
+                    text = text + "E0" + num + " - " + title;
+                }
+
+                return text;
+            }
+
+            function getNextEpisode(show) {
+                const nextEpisode = show.episodes.find(element => element.watched === false);
+                return nextEpisode;
+            }
+
+            function calculateEpisodesLeft(show) {
+                let count = 0;
+
+                show.episodes.forEach(element => {
+                    if (!element.watched) {
+                        count += 1;
+                    }
+                });
+
+                return count;
+            }
+
+            function calculateDaysLeft() {
+                const oneDay = 24*60*60*1000; // hours*minutes*seconds*milliseconds
+                const today = new Date();
+                const deadline = new Date(parseInt(localStorage.getItem('deadline')));
+                const daysLeft = Math.round(Math.abs((today.getTime() - deadline.getTime())/(oneDay)));
+
+                return daysLeft;
+            }
+
+            function getDaysLeftText() {
+                const daysLeft = calculateDaysLeft();
+                let text = "";
+
+                if (daysLeft == 1) {
+                    text = daysLeft + " day left!";
+                }
+                else {
+                    text = daysLeft + " days left";
+                };
+
+                return text;
+            }
+
+            function calculateEpisodesToday(show) {
+                const episodesLeft = calculateEpisodesLeft(show);
+                const daysLeft = calculateDaysLeft();
+                let episodesToday = null;
+                let text = "";
+
+                if (episodesLeft / daysLeft < 1) {
+                    episodesToday = parseInt(Math.floor(episodesLeft / daysLeft));
+                }
+                else {
+                    episodesToday = parseInt(Math.ceil(episodesLeft / daysLeft));
+                }
+
+                if (episodesToday == 1) {
+                    text = "watch " + episodesToday + " episode today";
+                }
+                else {
+                    text = "watch " + episodesToday + " episodes today";
+                };
+
+                return text;
+            }
+
+            function formatDate(date) {
+                const months = [
+                    "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+                ];
+
+                const day = date.getDate();
+                const monthIndex = date.getMonth();
+                const year = date.getFullYear();
+
+                return day + ' ' + months[monthIndex] + ' ' + year;
+            }
+
+            function updateUI(show) {
+
+                const nextEpisode = getNextEpisode(show);
+
+                if (!nextEpisode) {
+                    document.querySelector("#nextEpisode").innerHTML = `<p>You're up to date!</p>`;
+                    document.querySelector("#watchedBtn").style.display = "none";
+                    document.querySelector("#options").style.display = "none";
+                    document.querySelector("#episodesToday").style.display = "none";
+                    document.querySelector("#leftToWatch").style.display = "none";
+                    document.querySelector("#daysLeft").style.display = "none";
+                    document.querySelector("#options").style.display = "block";
+                    document.querySelector("#watchedMore").style.display = "none";
+                }
+                else {
+                    const { number, season, name } = nextEpisode;
+
+                    document.querySelector("#nextEpisode").innerHTML = `<p>Next episode: ${makeEpisodeText(number, season, name)}</p>`;
+                };
+
+                document.querySelector("#episodesToday").innerHTML = `<p>${calculateEpisodesToday(show)}</p>`;
+                document.querySelector("#leftToWatch").innerHTML = `<p>${calculateEpisodesLeft(show)} episodes to watch before <span id="deadline"></span></p>`;
+                document.querySelector("#daysLeft").innerHTML = `<p>${getDaysLeftText()}</p>`;
+                document.querySelector("#showTitle").innerHTML = `<p>${show.name}</p>`;
+            
+                updateDate();
+            }
+
+            function updateDate() {
+                const date = new Date(parseInt(localStorage.getItem('deadline')));
+                document.querySelector("#deadline").innerHTML = `${formatDate(date)}`;
+            }
+
+            function checkIfWatched(show) {
+                document.querySelector("#watchedBtn").addEventListener("click", function() {
+                    getNextEpisode(show).watched = true;
+                    writeToCache('show', show);
+                    updateUI(show);
+                });
+            }
+
+            function writeToCache(key, value) {
+                localStorage.setItem(key, JSON.stringify(value));
+            }
+
+            function getUniqueSeasons(episodes) {
+                return [...new Set(episodes.map(episode => episode.season))].length;
+            }
+
+            function filterEpisodeData(episode) {
+                const { name, season, number, runtime } = episode;
+                return {
+                    name,
+                    season,
+                    number,
+                    runtime,
+                    watched: false
+                };
+            }
+
+            function prepareShow(data) {
+                const { name } = data;
+                const { episodes: allEpisodes } = data._embedded;
+                const episodes = allEpisodes.map(episode => filterEpisodeData(episode));
+                const seasons = getUniqueSeasons(episodes);
+                return {
+                    name,
+                    seasons,
+                    episodes
+                };
+            }
+
+            function fetchFromApi() {
+                const name = localStorage.getItem('showName');
+                return fetch(`https://api.tvmaze.com/singlesearch/shows?q=${name}&embed=episodes`)
+                    .then(resp => resp.json())
+                    .then(resp => {
+                        const show = prepareShow(resp);
+                        writeToCache('show', show);
+                        return show;
+                    });
+            }
+
+            function fetchShow() {
+                return new Promise((resolve, reject) => {
+                    const show = JSON.parse(localStorage.getItem('show')); // reads a string version of show variable from storage
+                    show
+                        ? resolve(show)
+                        : resolve(fetchFromApi());
+                });
+            }
+
+            function getMinDate() {
+                let today = new Date();
+                let dd = today.getDate();
+                let mm = today.getMonth()+1;
+                let yyyy = today.getFullYear();
+
+                if (dd < 10) {
+                    dd = '0' + dd;
+                };
+                
+                if (mm < 10) {
+                    mm = '0' + mm;
+                }; 
+
+                today = yyyy + '-' + mm + '-' + dd;
+                return today;
+            }
+
+            function createInputUI() {
+                document.querySelector("#meeper-container").innerHTML = 
+                    `<form id="myForm">
+                        <div class='inputContainer'>
+                            <label for='showNameInput'>I want to watch</label>
+                            <input type='text' id='showNameInput'/>
+                        </div>
+                        <div class='inputContainer'>
+                            <label for='deadlineInput'>I want to finish by</label>
+                            <input type='date' id='deadlineInput' min='${getMinDate()}'/>
+                            <span class="validity"></span>
+                        </div>
+                        <button id='submitBtn'>watch it.</button>
+                    </form>`
+                ;
+            }
+
+            function createOutputUI() {
+                document.querySelector("#meeper-container").innerHTML = 
+                    `<div id="showTitle"></div>
+                    <div id="nextEpisode"></div>
+                    <button id="watchedBtn">watched it.</button>
+                    <p id="options"><span id="reset">reset?</span> <span id="watchedMore">| watched more?</span></p>
+                    <div id="episodesToday"></div>
+                    <div id="leftToWatch"></div>
+                    <div id="deadline"></div>
+                    <div id="daysLeft"></div>`
+                ;
+            }
+
+            function getUserInput() {
+
+                if (document.querySelector('#deadlineInput').type != 'date') {
+                    console.log("date picker not supported");
+                    const picker = datepicker('#deadlineInput');
+                }
+                else {
+                    console.log("date picker supported!");
+                }
+
+                let typed = new Typed('#showNameInput', {
+                    strings: ['Game of Thrones', 'Breaking Bad', 'The Simpsons', 'Battlestar Galactica', 'The Wire', 'Seinfeld'],
+                    typeSpeed: 40,
+                    backSpeed: 30,
+                    attr: 'placeholder',
+                    bindInputFocusEvents: true,
+                    loop: true
+                });
+
+                document.querySelector("#myForm").addEventListener("submit", function(event) {
+                    event.preventDefault();
+
+                    const showName = document.querySelector('#showNameInput').value;
+                    const deadline = new Date(document.querySelector("#deadlineInput").value).getTime();
+
+                    if (!showName) {
+                        document.querySelector('#showNameInput').focus();
+                    }
+                    else if (!deadline) {
+                        document.querySelector('#deadlineInput').focus();
+                    }
+                    else {
+                        writeToCache('deadline', deadline);
+                        writeToCache('showName', showName);
+    
+                        runUI();
+                    };
+                });
+            }
+
+            function checkIfReset() {
+                document.querySelector("#reset").addEventListener("click", function() {
+
+                    localStorage.removeItem("deadline");
+                    localStorage.removeItem("showName");
+                    localStorage.removeItem("show");
+                    
+                    createInputUI();
+                    getUserInput();
+                });
+            }
+
+            function runUI() {
+
+                fetchShow()
+                    .then(show => {
+                        createOutputUI();
+                        updateUI(show);
+                        checkIfWatched(show);
+                        checkIfReset();
+                    });
+                    
+            }
+
+            function runApp() {
+                if (!localStorage.getItem('deadline') || !localStorage.getItem('showName')) {
+                    createInputUI();
+                    getUserInput();
+                }
+                else {
+                    runUI();
+                };
+            }
+
+            runApp();
+
+        </script>
+    </body>
+</html>
