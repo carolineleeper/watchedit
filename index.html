@@ -2,7 +2,7 @@
 <html lang="en">
     <head>
         <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, shrink-to-fit=no, user-scalable=0">
         <title>watched it.</title>
         <link rel="icon" type="image/png" href="https://cdn4.iconfinder.com/data/icons/retro-tv/100/vintage_tv8_fixed-512.png">
         <link rel="stylesheet" href="https://unpkg.com/js-datepicker/dist/datepicker.min.css">
@@ -127,13 +127,13 @@
             }
 
             .pillGroup > .pill:first-child {
-                background-color: #5a85c5;
+                background-color: #46689b;
                 border-top-left-radius: 0.25em;
                 border-bottom-left-radius: 0.25em;
             }
 
             .pillGroup > .pill:last-child {
-                background-color: #46689b;
+                background-color: #5a85c5;
                 border-top-right-radius: 0.25em;
                 border-bottom-right-radius: 0.25em;
             }
@@ -212,8 +212,8 @@
                     "you're done for today, go outside!",
                     "phew! you're on track",
                     "you deserve a break after that marathon",
-                    "you're all caught up here, let's watch something else!",
-                    "you don't really need to watch another...",
+                    "you're all caught up here, go watch something else!",
+                    "you don't <em>really</em> need to watch another...",
                     "time to rest those eyes",
                     "you have met your daily quota, now frolick",
                     "ok, enough television, go bake a cake or something" 
@@ -257,10 +257,10 @@
                 }
 
                 if (averageEpisodes == 1) {
-                    text = "(or an average of " + averageEpisodes + " episode each day)";
+                    text = "(an average of " + averageEpisodes + " episode each day)";
                 }
                 else {
-                    text = "(or an average of " + averageEpisodes + " episodes each day)";
+                    text = "(an average of " + averageEpisodes + " episodes each day)";
                 };
 
                 return text;
@@ -300,7 +300,7 @@
                 };
 
                 document.querySelector("#showTitle").innerHTML = `<p>${show.name}</p>`;
-                document.querySelector("#countDown").innerHTML = `<span class="pillGroup"><span class="pill">episodes left</span><span class="pill">${calculateEpisodesLeft(show)}</span></span>   <span class="pillGroup"><span class="pill">days left</span><span class="pill">${calculateDaysLeft()}</span></span>`;
+                document.querySelector("#countDown").innerHTML = `<span class="pillGroup"><span class="pill">${calculateEpisodesLeft(show)}</span><span class="pill">episodes left</span></span> <span class="pillGroup"><span class="pill">${calculateDaysLeft()}</span><span class="pill">days left</span></span>`;
                 document.querySelector("#episodesToday").innerHTML = `<p>${calculateEpisodesToday(show)}</p>`;
                 document.querySelector("#averageToWatch").innerHTML = `<p>${calculateAveragePerDay(show)}</p>`;
                 // document.querySelector("#leftToWatch").innerHTML = `<p>${calculateEpisodesLeft(show)} episodes to watch before <span id="deadline"></span></p>`;
@@ -414,7 +414,7 @@
                     <div id="countDown"></div>
                     <div id="nextEpisode"></div>
                     <button id="watchedBtn">watched it.</button>
-                    <p id="options"><span id="reset">reset?</span> <span id="watchedMore">| watched more?</span></p>
+                    <p id="options"><span id="reset">reset?</span> <!--<span id="watchedMore">| watched more?</span>--></p>
                     <div id="episodesToday"></div>
                     <div id="leftToWatch"></div>
                     <div id="averageToWatch"></div>
