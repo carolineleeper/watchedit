@@ -16,15 +16,16 @@
             }
 
             #meeper-container {
-                padding: 20px;
+                padding: 10px 20px;
                 max-width: 100%;
             }
 
-            #nextEpisode, #episodesToday, #leftToWatch, #daysLeft {
+            #nextEpisode > p, #episodesToday, #leftToWatch, #daysLeft {
                 font-size: 2em;
             }
 
-             #showTitle {
+             #showTitle > p {
+                margin: 20px;
                 font-size: 3em;
             }
 
@@ -42,7 +43,7 @@
                 border: 0;
                 border-radius: 4px;
                 padding: 20px 40px;
-                margin: 20px;
+                /* margin: 20px; */
                 cursor: pointer;
                 font-size: 4em;
                 color: #f2f8ff;
@@ -76,6 +77,14 @@
                     width: 90%;
                 }
 
+                #showTitle > p {
+                    font-size: 2.3em;
+                }
+
+                #nextEpisode > p, #episodesToday, #leftToWatch, #daysLeft {
+                    font-size: 1.75em;
+                }
+
                 input {
                     display: block;
                     margin: auto;
@@ -105,10 +114,28 @@
                 display: block;
             }
 
-            #countDown {
-                background-color: #5a85c5;
+            .pillGroup {
                 border-radius: 0.25em;
-                /* background-color: #3b14d9; */
+                margin: 0px 10px;
+            }
+
+            .pill {
+                padding: 5px 7px;
+                width: 50%;
+                color: #f2f8ff;
+                letter-spacing: 0.045em;
+            }
+
+            .pillGroup > .pill:first-child {
+                background-color: #5a85c5;
+                border-top-left-radius: 0.25em;
+                border-bottom-left-radius: 0.25em;
+            }
+
+            .pillGroup > .pill:last-child {
+                background-color: #46689b;
+                border-top-right-radius: 0.25em;
+                border-bottom-right-radius: 0.25em;
             }
 
         </style>
@@ -273,7 +300,7 @@
                 };
 
                 document.querySelector("#showTitle").innerHTML = `<p>${show.name}</p>`;
-                document.querySelector("#countDown").innerHTML = `<span>test</span>`;
+                document.querySelector("#countDown").innerHTML = `<span class="pillGroup"><span class="pill">episodes left</span><span class="pill">${calculateEpisodesLeft(show)}</span></span>   <span class="pillGroup"><span class="pill">days left</span><span class="pill">${calculateDaysLeft()}</span></span>`;
                 document.querySelector("#episodesToday").innerHTML = `<p>${calculateEpisodesToday(show)}</p>`;
                 document.querySelector("#averageToWatch").innerHTML = `<p>${calculateAveragePerDay(show)}</p>`;
                 // document.querySelector("#leftToWatch").innerHTML = `<p>${calculateEpisodesLeft(show)} episodes to watch before <span id="deadline"></span></p>`;
