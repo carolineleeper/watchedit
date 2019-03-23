@@ -465,7 +465,7 @@
 
             function checkIfReset() {
                 document.querySelector("#reset").addEventListener("click", function() {
-
+                    console.log("click");
                     localStorage.removeItem("deadline");
                     localStorage.removeItem("showName");
                     localStorage.removeItem("show");
@@ -475,10 +475,18 @@
                 });
             }
 
+            function sanitiseEpisodes(show) {
+                const filteredEpisodes = show.episodes.filter(function(episode) {
+                    return episode.name !== 'TBA'
+                })
+                show.episodes = filteredEpisodes;
+            }
+
             function runUI() {
 
                 fetchShow()
                     .then(show => {
+                        sanitiseEpisodes(show);
                         createOutputUI();
                         updateUI(show);
                         checkIfWatched(show);
